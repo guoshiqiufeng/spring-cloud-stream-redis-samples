@@ -1,0 +1,11 @@
+version: "3.3"
+
+services:
+  redis-6379:
+    image: redis
+    container_name: redis-6379
+    restart: always
+    network_mode: "bridge"
+    ports:
+      - "6379:6379"
+    command: redis-server

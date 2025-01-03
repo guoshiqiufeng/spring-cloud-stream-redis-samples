@@ -1,0 +1,105 @@
+version: "3.3"
+
+services:
+  redis-6380:
+    image: redis
+    container_name: redis-6380
+    restart: always
+    network_mode: "bridge"
+    ports:
+      - "6380:6380"
+      - "16380:16380"
+    volumes:
+      - ./6380/conf/redis.conf:/usr/local/redis/redis.conf
+    command: redis-server /usr/local/redis/redis.conf --cluster-announce-ip $REDIS_CLUSTER_IP
+    environment:
+      - REDIS_CLUSTER_IP=${REDIS_CLUSTER_IP}
+
+  redis-6381:
+    image: redis
+    container_name: redis-6381
+    network_mode: "bridge"
+    ports:
+      - "6381:6381"
+      - "16381:16381"
+    volumes:
+      - ./6381/conf/redis.conf:/usr/local/redis/redis.conf
+    command: redis-server /usr/local/redis/redis.conf --cluster-announce-ip $REDIS_CLUSTER_IP
+    environment:
+      - REDIS_CLUSTER_IP=${REDIS_CLUSTER_IP}
+
+  redis-6382:
+    image: redis
+    container_name: redis-6382
+    network_mode: "bridge"
+    ports:
+      - "6382:6382"
+      - "16382:16382"
+    volumes:
+      - ./6382/conf/redis.conf:/usr/local/redis/redis.conf
+    command: redis-server /usr/local/redis/redis.conf --cluster-announce-ip $REDIS_CLUSTER_IP
+    environment:
+      - REDIS_CLUSTER_IP=${REDIS_CLUSTER_IP}
+
+  redis-6383:
+    image: redis
+    container_name: redis-6383
+    network_mode: "bridge"
+    ports:
+      - "6383:6383"
+      - "16383:16383"
+    volumes:
+      - ./6383/conf/redis.conf:/usr/local/redis/redis.conf
+    command: redis-server /usr/local/redis/redis.conf --cluster-announce-ip $REDIS_CLUSTER_IP
+    environment:
+      - REDIS_CLUSTER_IP=${REDIS_CLUSTER_IP}
+
+  redis-6384:
+    image: redis
+    container_name: redis-6384
+    network_mode: "bridge"
+    ports:
+      - "6384:6384"
+      - "16384:16384"
+    volumes:
+      - ./6384/conf/redis.conf:/usr/local/redis/redis.conf
+    command: redis-server /usr/local/redis/redis.conf --cluster-announce-ip $REDIS_CLUSTER_IP
+    environment:
+      - REDIS_CLUSTER_IP=${REDIS_CLUSTER_IP}
+
+  redis-6385:
+    image: redis
+    container_name: redis-6385
+    network_mode: "bridge"
+    ports:
+      - "6385:6385"
+      - "16385:16385"
+    volumes:
+      - ./6385/conf/redis.conf:/usr/local/redis/redis.conf
+    command: redis-server /usr/local/redis/redis.conf --cluster-announce-ip $REDIS_CLUSTER_IP
+    environment:
+      - REDIS_CLUSTER_IP=${REDIS_CLUSTER_IP}
+
+  redis-cluster-init:
+    image: redis
+    depends_on:
+      - redis-6380
+      - redis-6381
+      - redis-6382
+      - redis-6383
+      - redis-6384
+      - redis-6385
+    command: |
+      /bin/sh -c '
+      sleep 5 &&
+      redis-cli -a 123456 --cluster create \
+        '"$${REDIS_CLUSTER_IP}"':6380 \
+        '"$${REDIS_CLUSTER_IP}"':6381 \
+        '"$${REDIS_CLUSTER_IP}"':6382 \
+        '"$${REDIS_CLUSTER_IP}"':6383 \
+        '"$${REDIS_CLUSTER_IP}"':6384 \
+        '"$${REDIS_CLUSTER_IP}"':6385 \
+        --cluster-replicas 1 --cluster-yes
+      '
+    environment:
+      - REDIS_CLUSTER_IP=${REDIS_CLUSTER_IP}

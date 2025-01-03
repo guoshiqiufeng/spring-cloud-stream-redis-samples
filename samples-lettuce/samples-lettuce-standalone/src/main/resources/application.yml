@@ -1,0 +1,64 @@
+spring:
+  application:
+    name: samples-lettuce-standalone
+
+  cloud:
+    function:
+      definition: send;recall
+    stream:
+      default-binder: redis
+      binders:
+        redis:
+          type: redis
+      redis:
+        binder:
+          configuration:
+            host: 127.0.0.1
+            port: 6379
+            #            password: 123456
+            database: 7
+          support-type: publish_subscribe_channel
+            #        bindings:
+            #          send-in-0:
+          #            consumer:
+          # destination-is-pattern: true
+
+      bindings:
+        out-0:
+          destination: test-topic
+          content-type: text/plain
+          group: out-producer-group
+        out-1:
+          destination: test-recall-topic
+          content-type: text/plain
+          group: out-producer-group
+        send-in-0:
+          destination: test-topic
+          content-type: text/plain
+          group: test-send-group
+        recall-in-0:
+          destination: test-recall-topic
+          content-type: text/plain
+          group: test-recall-group
+
+
+#logging:
+#  level:
+#    org.springframework.cloud.stream: debug
+
+server:
+  port: 8000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
+  health:
+    binders:
+      enabled: true
+    redis:
+      enabled: false

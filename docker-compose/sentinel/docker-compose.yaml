@@ -1,0 +1,91 @@
+version: "3.3"
+
+services:
+  docker_redis_master:
+    image: redis
+    container_name: docker_redis_master
+    restart: always
+    network_mode: "bridge"
+    ports:
+      - "7379:7379"
+    volumes:
+      - ./7379/conf/redis.conf:/usr/local/redis/redis.conf
+    command: redis-server /usr/local/redis/redis.conf
+    environment:
+      - REDIS_MASTER_IP=${REDIS_MASTER_IP}
+
+  docker_redis_slave1:
+    image: redis
+    container_name: docker_redis_slave1
+    network_mode: "bridge"
+    ports:
+      - "7380:7380"
+    volumes:
+      - ./7380/conf/redis.conf:/usr/local/redis/redis.conf
+    command: redis-server /usr/local/redis/redis.conf --slaveof $REDIS_MASTER_IP 7379
+    depends_on:
+      - docker_redis_master
+    environment:
+      - REDIS_MASTER_IP=${REDIS_MASTER_IP}
+
+  docker_redis_slave2:
+    image: redis
+    container_name: docker_redis_slave2
+    network_mode: "bridge"
+    ports:
+      - "7381:7381"
+    volumes:
+      - ./7381/conf/redis.conf:/usr/local/redis/redis.conf
+    command: redis-server /usr/local/redis/redis.conf --slaveof $REDIS_MASTER_IP 7379
+    depends_on:
+      - docker_redis_master
+    environment:
+      - REDIS_MASTER_IP=${REDIS_MASTER_IP}
+
+  docker_redis_sentinel27379:
+    image: redis
+    container_name: docker_redis_sentinel27379
+    network_mode: "bridge"
+    ports:
+      - "27379:27379"
+    volumes:
+      - ./27379/conf:/app/application/redis-temp
+    command: redis-sentinel /app/application/redis-temp/redis.conf --sentinel monitor mymaster $REDIS_MASTER_IP 7379 2
+    depends_on:
+      - docker_redis_master
+      - docker_redis_slave1
+      - docker_redis_slave2
+    environment:
+      - REDIS_MASTER_IP=${REDIS_MASTER_IP}
+
+  docker_redis_sentinel27380:
+    image: redis
+    container_name: docker_redis_sentinel27380
+    network_mode: "bridge"
+    ports:
+      - "27380:27380"
+    volumes:
+      - ./27380/conf:/app/application/redis-temp
+    command: redis-sentinel /app/application/redis-temp/redis.conf --sentinel monitor mymaster $REDIS_MASTER_IP 7380 2
+    depends_on:
+      - docker_redis_master
+      - docker_redis_slave1
+      - docker_redis_slave2
+    environment:
+      - REDIS_MASTER_IP=${REDIS_MASTER_IP}
+
+  docker_redis_sentinel27381:
+    image: redis
+    container_name: docker_redis_sentinel27381
+    network_mode: "bridge"
+    ports:
+      - "27381:27381"
+    volumes:
+      - ./27381/conf:/app/application/redis-temp
+    command: redis-sentinel /app/application/redis-temp/redis.conf --sentinel monitor mymaster $REDIS_MASTER_IP 7381 2
+    depends_on:
+      - docker_redis_master
+      - docker_redis_slave1
+      - docker_redis_slave2
+    environment:
+      - REDIS_MASTER_IP=${REDIS_MASTER_IP}
